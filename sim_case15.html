@@ -371,8 +371,8 @@
     <table id="logtable"><caption class="sr-only">Time-stamped actions</caption><thead class="sr-only"><tr><th scope="col">Time</th><th scope="col">Type</th><th scope="col">Action</th></tr></thead><tbody id="logbody"></tbody></table>
   </div></div>
   <div class="card"><h2>Encounter Summary: your quiz answer</h2><div class="body">
-    <p style="font-size:13.5px;line-height:1.5;margin-bottom:10px;">When your presentation is finished, click the button below. It compiles your clinical notes and your complete time-stamped action log into one text block and copies it. <b>Paste it into the essay answer box below the simulation.</b> If copying is blocked, use <b>Download .txt</b> and upload or paste from that file.</p>
-    <div class="btnrow"><button id="gencopy" type="button" class="cta">Generate &amp; Copy Encounter Summary</button><button id="dltxt" type="button" class="secondary" hidden>Download .txt</button></div>
+    <p style="font-size:13.5px;line-height:1.5;margin-bottom:10px;">When your presentation is finished, click the button below. It compiles your clinical notes and your complete time-stamped action log into one text block and copies it. <b>Paste it into the essay answer box below the simulation.</b> If copying is blocked, the summary stays selected in the box: press Ctrl+C (⌘C) and paste it.</p>
+    <div class="btnrow"><button id="gencopy" type="button" class="cta">Generate &amp; Copy Encounter Summary</button></div>
     <span id="copystatus" role="status" style="display:block;margin-top:8px;font-size:13px;color:#22663f;font-weight:600;"></span>
     <label for="summarybox" class="sr-only">Encounter summary text</label>
     <textarea id="summarybox" readonly style="display:none;margin-top:10px;min-height:200px;font-family:ui-monospace,Consolas,monospace;font-size:12.5px;"></textarea>
@@ -873,13 +873,10 @@ function buildSummary(){
   LOG.forEach(e=>{out+='['+e.t+'] '+e.kind.toUpperCase()+': '+e.text.replace(/<[^>]+>/g,'')+'\n';});
   out+='\nVerification code: '+fnv(out.replace(/\s+/g,' ').trim())+'\n';
   return out;}
-function setCopied(ok){$('copystatus').textContent=ok?'✓ Copied to clipboard. Paste it into the quiz answer box below the simulation.':'Copy was blocked here. The text is selected: press Ctrl+C (⌘C), or use Download .txt.';}
-$('gencopy').onclick=function(){const out=buildSummary();const box=$('summarybox');box.value=out;box.style.display='block';$('dltxt').hidden=false;
+function setCopied(ok){$('copystatus').textContent=ok?'✓ Copied to clipboard. Paste it into the quiz answer box below the simulation.':'Copy was blocked here. The text is selected: press Ctrl+C (⌘C) to copy it, then paste it into the quiz answer box.';}
+$('gencopy').onclick=function(){const out=buildSummary();const box=$('summarybox');box.value=out;box.style.display='block';
   box.focus();box.select();let copied=false;try{copied=document.execCommand('copy');}catch(e){}
   if(!copied&&navigator.clipboard){navigator.clipboard.writeText(out).then(()=>setCopied(true)).catch(()=>setCopied(false));}else setCopied(copied);};
-$('dltxt').onclick=function(){const out=$('summarybox').value||buildSummary();
-  try{const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([out],{type:'text/plain'}));a.download='CDCA_case'+CASE.num+'_summary.txt';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
-  catch(e){$('copystatus').textContent='Download was blocked here. Select the text above and copy it.';}};
 // ---------- chart sections: note the first time each one is opened ----------
 document.querySelectorAll('#chart details.card').forEach(function(d){d.addEventListener('toggle',function(){
   if(!d.open||d.dataset.seen||phase==='pre')return;d.dataset.seen='1';const t=d.querySelector('summary');
